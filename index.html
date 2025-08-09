@@ -5,16 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zapier PWA</title>
   <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #fff;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    iframe {
+      border: none;
+      flex-grow: 1;
+    }
+    .fallback {
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
 </head>
-<body style="margin:0; height:100vh; overflow:hidden;">
-  <iframe src="https://zapier.com/app/home" style="border:none; width:100%; height:100vh;"></iframe>
+<body>
+  <div class="fallback" id="fallback" style="display:none;">
+    <p>Zapier didn’t load in the app. <a href="https://zapier.com/app/home" target="_blank">Click here to open it</a>.</p>
+  </div>
+
+  <iframe id="zapierFrame" src="https://zapier.com/app/home" width="100%" height="100%"></iframe>
 
   <script>
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(() => {
-        console.log('Service Worker Registered');
-      });
+      navigator.serviceWorker.register('service-worker.js').catch(console.error);
     }
+
+    // Check if iframe loads successfully
+    const iframe = document.getElementById('zapierFrame');
+    const fallback = document.getElementById('fallback');
+
+    iframe.addEventListener('error', () => {
+      iframe.style.display = 'none';
+      fallback.style.display = 'block';
+    });
+
+    // Optional: Timeout to show fallback if loading takes too long
+    setTimeout(() => {
+      if (!iframe.contentWindow || iframe.contentWindow.length === 0) {
+        iframe.style.display = 'none';
+        fallback.style.display = 'block';
+      }
+    }, 8000);
   </script>
 </body>
 </html>
